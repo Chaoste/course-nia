@@ -215,3 +215,44 @@ def get_rls():
         ],
     ])
     return title, labels, all_runtimes
+
+
+def get_rls_go():
+    title = r'Random Local Search ($greater_only=True$)'
+    labels = ["one_max", "leading_ones"]
+    all_runtimes = np.array([
+
+    ])
+    return title, labels, all_runtimes
+
+def get_one_one_go():
+    title = r'(1+1)-EA ($greater_only=True$)'
+    labels = ["one_max", "leading_ones"]
+    all_runtimes = np.array([
+
+    ])
+    return title, labels, all_runtimes
+
+def get_one_lambda_2_go():
+    title = r'(1+$\lambda$)-EA  [$\lambda = 2$] ($greater_only=True$)'
+    labels = ["one_max", "leading_ones"]
+    all_runtimes = np.array([
+
+    ])
+    return title, labels, all_runtimes
+
+def get_one_lambda_10_go():
+    title = r'(1+$\lambda$)-EA  [$\lambda = 10$] ($greater_only=True$)'
+    labels = ["one_max", "leading_ones"]
+    all_runtimes = np.array([
+
+    ])
+    return title, labels, all_runtimes
+
+def get_one_lambda_50_go():
+    title = r'(1+$\lambda$)-EA  [$\lambda = 50$] ($greater_only=True$)'
+    labels = ["one_max", "leading_ones"]
+    all_runtimes = np.array([
+
+    ])
+    return title, labels, all_runtimes
