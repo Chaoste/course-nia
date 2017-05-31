@@ -57,7 +57,7 @@ def oneOneEA(n, target_func, only_greater=False):
     while not is_max(x):
         y = x.copy()
         probabilities = np.random.binomial(1, 1/n, n)
-        y = probabilities * negate(y) + negate(probabilities) * y 
+        y = probabilities * negate(y) + negate(probabilities) * y
         if (target_func(y) > target_func(x) or
                 (not only_greater and target_func(y) == target_func(x))):
             x = y
@@ -121,8 +121,8 @@ def evaluate_algorithm(ns, opt_func, title, problems, ax, only_greater=False):
     ax.legend()
     return algorithm_runtimes
 
-def evaluate_all(ns, algos, problems, only_greater=False):
-    filename = "{} - {}".format(ns[-1], "g" if only_greater else "ge")
+def evaluate_all(ns, algos, problems, only_greater=False, filename_suffix=""):
+    filename = "{} - {}{}".format(ns[-1], "g" if only_greater else "ge", filename_suffix)
     # All optimizing algorithm are executed on all given problems
     fig, axes = plt.subplots(len(algos), 1, figsize=(16, 8 * len(algos)))
     # Hotfix to make "axes.flat" work for only one algorithm
@@ -133,5 +133,3 @@ def evaluate_all(ns, algos, problems, only_greater=False):
                            problems, ax, only_greater)
     # Contains n and the only_greater flag
     fig.savefig("{}.pdf".format(filename))
-
-
