@@ -1,4 +1,6 @@
 import numpy as np
+import itertools as it
+from haversine import haversine
 
 """
 a.) EDGE_WEIGHT_FORMAT: FULL_MATRIX
@@ -16,6 +18,9 @@ NODE_COORD_SECTION
 f.) EDGE_WEIGHT_TYPE : EUC_2D
 NODE_COORD_SECTION
 """
+
+# Numpy won't be very efficient but it also allows very large integers (far above 64 bits)
+BIG_INT = 'object'
 
 # Old function for generating an adjacent matrix based on coordinates
 def deprecated_process_graph(G):
@@ -71,17 +76,17 @@ def get_file_info(tsp_name):
     problem.append(('definition_type', lines[i].strip()))
     i += 1
     definitions = ''
-    while 'EOF' not in lines[i]:
+    while 'EOF' not in lines[i] and lines[i].lstrip()[0].isdigit():
         definitions += lines[i] + ' '
         i += 1
     problem.append(('definition', definitions))
     return dict(problem)
 
-def parse_lower_diag_row(problem):
+def parse_half_edge_weights(problem):
     # Examples: gr17, gr21, gr24, gr48
     numbers = [int(x) for x in problem['definition'].split()]
     cities = int(problem['dimension'])
-    am = np.zeros((cities, cities), dtype=np.int)
+    am = np.zeros((cities, cities), dtype=BIG_INT)
     col = 0
     row = 0
     for i, value in enumerate(numbers):
@@ -93,10 +98,49 @@ def parse_lower_diag_row(problem):
             col += 1
     return am
 
+def parse_full_edge_weights(problem):
+    # Examples: bays29
+    numbers = [int(x) for x in problem['definition'].split()]
+    cities = int(problem['dimension'])
+    am = np.array(numbers, dtype=BIG_INT).reshape((cities, cities))
+    return am
+
+def parse_node_coord_section(problem, dtype=float):
+    # Examples: att48, berlin52, burma14, fnl4461, gr96
+    numbers = [dtype(x) for x in problem['definition'].split()]
+    cities = int(problem['dimension'])
+    # Ignore ID
+    coords =  np.array(numbers, dtype=dtype).reshape(cities, 3)[:, 1:]
+    # Generate adjacent matrix containing the euclidean distances between nodes
+    am = np.zeros((cities, cities), dtype=dtype)
+    for i, j in it.combinations(range(cities), 2):
+        # TODO: Do we need the haversine package for calculating the distance
+        # (assuming the coords are latitude and longitude)
+        # am[i, j] = am[j, i] = haversine(positions[i], positions[j])
+        i_x, i_y = coords[i]
+        j_x, j_y = coords[j]
+        am[i, j] = am[j, i] = np.hypot((i_x - j_x), (i_y - j_y))
+    return am
+
 def parse_distances(problem):
-    if 'edge_weight_format' in problem and problem['edge_weight_format'] == 'LOWER_DIAG_ROW':
-        # Only half of the distance matrix given as integer
-        return parse_lower_diag_row(problem)
+    if problem['definition_type'] == 'EDGE_WEIGHT_SECTION':
+        # We get a full or half adjacent matrix containing the distances
+        if 'edge_weight_format' in problem and problem['edge_weight_format'] == 'LOWER_DIAG_ROW':
+            # Only half of the distance matrix given as integer
+            return parse_half_edge_weights(problem)
+        elif 'edge_weight_format' in problem and problem['edge_weight_format'] == 'FULL_MATRIX':
+            # Full adjacent matrix
+            return parse_full_edge_weights(problem)
+        else:
+            raise ValueError('Unsupported tsp data format')
+    elif problem['definition_type'].upper() == 'NODE_COORD_SECTION':
+        if 'display_data_type' in problem and problem['display_data_type'] == 'COORD_DISPLAY':
+            # Float numbers
+            return parse_node_coord_section(problem, float)
+        else:
+            # Integer numbers (64 bit due to later occuring overflows
+            # e.g. when taking to the power of 4)
+            return parse_node_coord_section(problem, BIG_INT)
     else:
         raise ValueError('Unsupported tsp data format')
 
@@ -125,5 +169,5 @@ def load_problem(tsp_name, opt_file='data/opt_solutions.txt'):
     return problem
 
 if __name__ == '__main__':
-    problem = load_problem('data/gr17')
+    problem = load_problem('data/burma14')  # bays29, gr17, burma14
     print(problem)
