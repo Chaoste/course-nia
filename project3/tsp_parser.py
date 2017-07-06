@@ -107,10 +107,14 @@ def parse_full_edge_weights(problem):
 
 def parse_node_coord_section(problem, dtype=float):
     # Examples: att48, berlin52, burma14, fnl4461, gr96
-    numbers = [dtype(x) for x in problem['definition'].split()]
+    # fast workaround for dtype = BIGINT = 'object'
+   convert = dtype
+   if (dtype == 'object'):
+       convert = int
+    numbers = [convert(x) for x in problem['definition'].split()]
     cities = int(problem['dimension'])
     # Ignore ID
-    coords =  np.array(numbers, dtype=dtype).reshape(cities, 3)[:, 1:]
+    coords = np.array(numbers, dtype=dtype).reshape(cities, 3)[:, 1:]
     # Generate adjacent matrix containing the euclidean distances between nodes
     am = np.zeros((cities, cities), dtype=dtype)
     for i, j in it.combinations(range(cities), 2):
