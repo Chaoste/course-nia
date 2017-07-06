@@ -108,9 +108,9 @@ def parse_full_edge_weights(problem):
 def parse_node_coord_section(problem, dtype=float):
     # Examples: att48, berlin52, burma14, fnl4461, gr96
     # fast workaround for dtype = BIGINT = 'object'
-   convert = dtype
-   if (dtype == 'object'):
-       convert = int
+    convert = dtype
+    if (dtype == 'object'):
+        convert = int
     numbers = [convert(x) for x in problem['definition'].split()]
     cities = int(problem['dimension'])
     # Ignore ID
