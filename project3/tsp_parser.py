@@ -114,12 +114,14 @@ def parse_node_coord_section(problem, dtype=float):
     # Generate adjacent matrix containing the euclidean distances between nodes
     am = np.zeros((cities, cities), dtype=dtype)
     for i, j in it.combinations(range(cities), 2):
-        # TODO: Do we need the haversine package for calculating the distance
-        # (assuming the coords are latitude and longitude)
-        # am[i, j] = am[j, i] = haversine(positions[i], positions[j])
-        i_x, i_y = coords[i]
-        j_x, j_y = coords[j]
-        am[i, j] = am[j, i] = np.hypot((i_x - j_x), (i_y - j_y))
+        if problem['edge_weight_type'] == 'GEO':
+            # (assuming the coords are latitude and longitude)
+            am[i, j] = am[j, i] = haversine(coords[i], coords[j])
+        else:
+            # Otherwise calculate euclidean distance
+            i_x, i_y = coords[i]
+            j_x, j_y = coords[j]
+            am[i, j] = am[j, i] = np.hypot((i_x - j_x), (i_y - j_y))
     return am
 
 def parse_distances(problem):

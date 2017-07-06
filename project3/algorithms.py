@@ -91,18 +91,24 @@ class MMAS:
         filler = [None] * ((len(self.results) - len(rm)) // 2)
         return np.array(filler + list(rm) + filler)
 
-    def plot(self):
-        fig_length = max(8, min(18, len(self.results) // 400))
-        fig, ax = plt.subplots(1, 1, figsize=(fig_length, 4))
+    def plot(self, ax=None, avg=True):
+        fig = None
+        if ax is None:
+            fig_length = max(8, min(18, len(self.results) // 400))
+            fig, ax = plt.subplots(1, 1, figsize=(fig_length, 4))
         ax.plot(self.results)
-        ax.plot(self._averaged_results(10), color="red")
-        ax.plot(self._averaged_results(100), color="green")
-        ax.set_xlim([0, len(self.results)])
+        if avg:
+            ax.plot(self._averaged_results(10), color="red")
+            ax.plot(self._averaged_results(100), color="green")
+        if ax.get_xlim()[1] != 1 and ax.get_xlim()[1] > len(self.results):
+            ax.set_xlim([0, len(self.results)])
         ax.set_title('MMAS - {}, best value: {:.2f} (OPT: {})'.format(
             self.problem['name'], self.best_x_value, self.problem['opt']))
         ax.set_xlabel('Epoch')
         ax.set_ylabel('Route length')
-        fig.tight_layout()
+        if fig:
+            fig.tight_layout()
+        return ax
 
     def __call__(self, plot=True):
         self.start_time = time.time()
