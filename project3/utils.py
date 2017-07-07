@@ -52,3 +52,13 @@ def evaluate_params(problem, opt_setting, runtime=20):
 
     ax.legend(['Default (found {:.2f})'.format(route_length1), 'Optimal (found {:.2f})'.format(route_length2)])
     ax.set_title('Comparing parameter settings (Best solution: {})'.format(problem['opt']))
+
+def opt_setting(problem):
+    n = problem['dimension']
+    opt_setting = dict()
+    opt_setting['alpha'] = 1
+    opt_setting['beta'] = 6
+    opt_setting['rho'] = 1 / n**0.25
+    opt_setting['tau_min'] = 1 / n
+    opt_setting['tau_max'] = 1 - min(20, n/4)/n
+    return opt_setting
