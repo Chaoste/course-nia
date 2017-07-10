@@ -22,40 +22,6 @@ NODE_COORD_SECTION
 # Numpy won't be very efficient but it also allows very large integers (far above 64 bits)
 BIG_INT = 'object'
 
-# Old function for generating an adjacent matrix based on coordinates
-def deprecated_process_graph(G):
-    n = len(G['coords'])
-    # Assuming that the ids are from 1 to n
-    N = np.arange(n)
-    positions = np.zeros((n, 2), dtype=np.float)
-    # Collect all positions assuming that the nodes are sorted by id
-    positions = [(float(x), float(y)) for x, y in G['coords'].values()]
-    # Generate adjacent matrix
-    am = np.zeros((n, n), dtype=np.float)
-    if (G['edge_type'] == "GEO"):
-        for i, j in it.combinations(N, 2):
-            am[i, j] = am[j, i] = haversine(positions[i], positions[j])
-    ## Generate adjacent matrix containing the euclidean distances between nodes
-    #am = np.zeros((n, n), dtype=np.float)
-    #for i, j in it.combinations(N, 2):
-    #    i_x, i_y = positions[i]
-    #    j_x, j_y = positions[j]
-    #    am[i, j] = am[j, i] = np.hypot((i_x - j_x), (i_y - j_y))
-    return N, n, am
-def deprecated_load_data():
-    data = read_tsp_data("data/burma14.tsp")
-    print(data)
-    graph['edge_type'] = get_edge_type(data)
-    if (graph['edge_type'] != "GEO"):
-        raise Exception("edge_type not implemented", graph['edge_type'])
-    dimension = detect_dimension(data)
-    cities_set = get_cities(data,dimension)
-    cities_tups = city_tup(cities_set)
-    cities_dict = create_cities_dict(cities_tups)
-    graph['coords'] = cities_dict
-    return graph
-    return dict([(1, ('38.24', '20.42')), (2, ('39.57', '26.15')), (3, ('40.56', '25.32')), (4, ('36.26', '23.12')), (5, ('33.48', '10.54')), (6, ('37.56', '12.19')), (7, ('38.42', '13.11')), (8, ('37.52', '20.44')), (9, ('41.23', '9.10')), (10, ('41.17', '13.05')), (11, ('36.08', '-5.21')), (12, ('38.47', '15.13')), (13, ('38.15', '15.35')), (14, ('37.51', '15.17')), (15, ('35.49', '14.32')), (16, ('39.36', '19.56'))])
-
 def get_file_info(tsp_name):
     # Transform file content into a object containing all information
     problem = []
@@ -111,7 +77,7 @@ def parse_node_coord_section(problem, dtype=float):
     convert = dtype
     if (dtype == 'object'):
         convert = int
-    numbers = [convert(x) for x in problem['definition'].split()]
+    numbers = [convert(float(x)) for x in problem['definition'].split()]
     cities = int(problem['dimension'])
     # Ignore ID
     coords = np.array(numbers, dtype=dtype).reshape(cities, 3)[:, 1:]

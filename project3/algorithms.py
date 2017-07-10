@@ -32,6 +32,8 @@ class MMAS:
         self.tau_max = kwargs.get('tau_max') or self.n - 1 / self.n
         self.alpha = kwargs.get('alpha') or 1
         self.beta = kwargs.get('beta') or 0
+        self.best_x = None
+        self.best_x_value = None
 
     def _init_tau(self):
         return np.array([[1 / self.n for x in range(self.n)] for y in range(self.n)], dtype=np.float)
@@ -112,8 +114,9 @@ class MMAS:
 
     def __call__(self, plot=True):
         self.start_time = time.time()
-        self.best_x = self._construct()
-        self.best_x_value = self._route_length(self.best_x)
+        if self.best_x is None:
+            self.best_x = self._construct()
+            self.best_x_value = self._route_length(self.best_x)
         self.results = [self.best_x_value]
         self._update_tau(self.best_x)
         while not self._is_optimum_found(self.best_x):
