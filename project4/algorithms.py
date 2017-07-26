@@ -22,7 +22,7 @@ def generate_random_solution(students, previous_teaming, precision):
     return teaming, round(metric_values, precision)
 
 def mutate(teaming, steps, previous_teaming, precision):
-    mutation = pd.DataFrame(teaming)
+    mutation = pd.DataFrame(teaming.copy())
     for _ in range(steps):
         i1, i2 = np.random.choice(mutation.index, 2, replace=False)
         temp = mutation['Team'][i1]
@@ -70,13 +70,16 @@ def semo(students, semester, debug=False, init_P=None, epochs=5,
         P = init_P
     for i in range(epochs):
         x = P[np.random.choice(range(len(P)), 1)[0]]
+        # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #1')
         x2 = mutate(x[0], mutation_intensity, previous_teaming, precision)
+        # metrics.print_metric(metrics.sem_multi_objective(x[0], previous_teaming), 'debug #2')
         P = check_domination(P, x2)
         if i % np.ceil(epochs / 10) == 0:
             print('.', end='')
+            # metric_values = metrics.sem_multi_objective(x2[0], previous_teaming)
     best = best_element(P)
     print('\nBest solution out of {} elements:'.format(len(P)))
-    metrics.print_metric(best[1], 'teaming 2')
+    metrics.print_metric(best[1], 'semester {}'.format(semester))
     if debug:
         return P
     return best[0]

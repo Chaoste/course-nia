@@ -79,7 +79,7 @@ def overall_multi_objective(teaming, previous_teaming=None):
         sem_teaming = teaming[teaming['Semester'] == semester]
         assert len(sem_teaming) in (80, 81),\
             'Expected 80 or 81 students but got {}'.format(len(sem_teaming))
-        results.append(sem_multi_objective(sem_teaming, previous_teaming))
+        results.append(round(sem_multi_objective(sem_teaming, previous_teaming), 2))
     return np.mean(results, axis=0)
 
 def print_metric(metric_output, teaming_name):

@@ -17,7 +17,7 @@ def process_semesters(students, target_func, *args, **kwargs):
             'Expected 80 or 81 students but got {}'.format(len(students))
         partial_result = target_func(sem_students, semester, *args, **kwargs)
         result.append(partial_result)
-    return pd.concat(result, ignore_index=True)
+    return pd.concat(result)
 
 def store_teaming(teaming, filename=None):
     # Use the same format as used for the input data
