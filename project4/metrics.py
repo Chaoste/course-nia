@@ -47,6 +47,13 @@ def metric_collision(team, previous_teaming=None):
     if previous_teaming is None:
         return 0
     k = len(team)
+    if isinstance(previous_teaming, tuple):
+        previous_teaming1, previous_teaming2 = previous_teaming
+        collisions = sum((previous_teaming1['Team'][s1] == previous_teaming1['Team'][s2]) + \
+                         (previous_teaming2['Team'][s1] == previous_teaming2['Team'][s2])
+                         for s1, s2 in it.combinations(team.index, 2))
+        possible_collisions = 20 if k == 5 else 30  # k * (k - 1) / 2
+        return collisions / possible_collisions
     collisions = sum(previous_teaming['Team'][s1] == previous_teaming['Team'][s2]
                      for s1, s2 in it.combinations(team.index, 2))
     # Normalize using the gaussian summation formula

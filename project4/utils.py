@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import itertools as it
+import metrics
 import csv
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -17,7 +18,7 @@ def process_semesters(students, target_func, *args, **kwargs):
             'Expected 80 or 81 students but got {}'.format(len(students))
         partial_result = target_func(sem_students, semester, *args, **kwargs)
         result.append(partial_result)
-    return pd.concat(result)
+    return pd.DataFrame(pd.concat(result).copy(), index=range(321))
 
 def store_teaming(teaming, filename=None):
     # Use the same format as used for the input data
@@ -60,3 +61,35 @@ def plot_pareto_front_2d(P, filename=None):
     fig.tight_layout()
     if filename:
         fig.savefig(filename)
+
+def plot_comparison(teaming_metrics, filename=None):
+    fig, ax = plt.subplots(1, 1, figsize=(11, 4))
+    for i, teaming_metric in enumerate(teaming_metrics):
+        if i in (0, 1):
+            ax.plot(teaming_metric[:-1], label='teaming{}'.format(i+1))
+        else:
+            ax.plot(teaming_metric, label='teaming{}'.format(i+1))
+    ax.set_xticks([0, 1, 2, 3])
+    ax.set_xticklabels(['Gender', 'Discipline', 'Nationality', 'Collision'])
+    ax.legend()
+    ax.set_title('The submetrics of all teamings')
+    fig.tight_layout()
+    if filename:
+        fig.savefig(filename)
+
+def comparison_table(teaming1, teaming2, teaming3, teaming4, METRICS, SEMESTER, verbose=False):
+    comparison = pd.Panel(items=('teaming1', 'teaming2', 'teaming3', 'teaming4'),
+                      major_axis=METRICS, minor_axis=SEMESTER)
+    teamings = (teaming1, teaming2, teaming3, teaming4)
+    previous = (None, None, teaming2, (teaming2, teaming3))
+    for i, (teaming, previous_teamings) in enumerate(zip(teamings, previous)):
+        for semester in SEMESTER:
+            name = 'teaming{}'.format(i+1)
+            sem_teaming = teaming[teaming['Semester'] == semester]
+            result = metrics.sem_multi_objective(sem_teaming, previous_teamings)
+            if previous_teamings is None:
+                result[-1] = None
+            if verbose:
+                metrics.print_metric(result, '{} - semester {}'.format(name, semester))
+            comparison.loc[name, :, semester] = result
+    return comparison
